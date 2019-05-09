@@ -44,8 +44,39 @@ $ sudo -u <rolename:postgres> psql #logs in with a particular user
 
 
 ### Geolocation Support
+Add column:
+```sql
+alter table your_table add column geog geography;
+```
+
+Insert value:
+```sql
+insert into your_table (geog) values ('SRID=4326;POINT(longitude latitude)');
+```
+
+4326 is Spatial Reference ID that says it's data in degrees longitude and latitude, same as in GPS. More about it: http://epsg.io/4326
+
+Order is Longitude, Latitude - so if you plot it as the map, it is (x, y).
+
+To find closest point you need first to create spatial index:
+
+```sql
+create index on your_table using gist (geog);
+```
+
+and then request, say, 5 closest to a given point:
+
+```sql
+select * 
+from your_table 
+order by geog <-> 'SRID=4326;POINT(lon lat)' 
+limit 5;
+```
+
 https://tapoueh.org/blog/2018/08/geolocation-with-postgresql/
 https://github.com/daryllxd/lifelong-learning/blob/master/_cheat-sheets/postgres.md
+https://stackoverflow.com/questions/8150721/which-data-type-for-latitude-and-longitude
+
 
 
 ### Scaling Postgres
